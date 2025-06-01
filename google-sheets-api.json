@@ -1,13 +1,13 @@
 {
   "type": "service_account",
-  "project_id": "your-gcp-project-id",
-  "private_key_id": "your-private-key-id",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_CONTENT_HERE\n-----END PRIVATE KEY-----\n",
-  "client_email": "your-service-account-name@your-gcp-project-id.iam.gserviceaccount.com",
-  "client_id": "your-client-id",
+  "project_id": "fashion-studion-etl-project",
+  "private_key_id": "40af7797f80d39e353fdd52bf11f71af8e078401",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDD/4RhuAjNb1iB\nYzPWvQUbgof/HyEs5fz+L/kSGe/V23NrEgaVFsySi2rCPaDFr1mynUeNLSREzg46\nzQK9QOC3SlNtnR1DTOPcFHBExOgv4phEdQGghV6ZEUzZVg6dq1u91ANaixNk7Ii+\nsN3NE2SN7+yCe0ojDCBTHAxCInSjbPp2qIgqpztMPdTxGNPfrZb2APARgM6+kZDU\nVXRYqc7hRTRLbWQqT6RYhwIhGEb+QH0Np8uO1zLMcfzqsWgynWx4S0Sn3lv4f0P+\nKOP0SDhjk8x0Lt+RFH+9FK7cquVou73oCJWEPluKj5reeF9UETEjm8CvO7A0d6It\nM6pGsLGLAgMBAAECggEAIr1HWYqlBMSXi1dp+MXIAfhA4pdB6hNZpDQckXjHacBb\n1L59LC++UrsjUQpbVK6f12jJJdy6cPeUzhdIRQMa0WH7J5KRfTxDpt54h7fe753a\nH0gd4bXB7p+CX4NBU/DrcdoCPiooZdsG4cW3ioHFcOL1qKrxmQStNg3inlY9FjoK\nvwIsnO27FcosgT8i9GwB66EsnuK/7IaxX8djrwlrLN5cZBfixk23n5nJFkdFo9jS\nCZ1fj+dh9T9cdxTdg3GWY3AmZM47/BMAoTifmeB1WWiRsPDHl0nbwSOp7vny6PrU\nwKVYz0Y8th1oTIbY/sMky9XxMmBgp9OZ23M/vMZ1AQKBgQD7AORmMJLNN72NuJsZ\nSPoXbr0GbzC2NLxWONvA12StSWzn3B3pWUX5tAvOHfpP9ZMNn1eHmB0evsPdEbUM\n6BlQ/n4kWnvseZnNHtmXZcehsHhPz9O3zFdHjn8nGrSw2i2kRmO542VdM95hl9SP\ncWntnHtR34kxbMKy1qzGDp8r5QKBgQDH5lGg8FTIRcBnaOVOQb5KHWl1+WxU2hVz\nlrK/tHagC0sMNFRD2SMZxqdxA3Y1jgArrL1f4Wqyzi4WL1j+XqKRfeN6HETMXAJz\nmwz9KacKfkK8QZGfewKeMtQNV2LFELh20m9ng/Q7xj+3Sz4i+rdn3rESPggdRuhh\nQRS/5h/wrwKBgQCCcMJBQPjpYRBG+CrSBxTA3LGrCFmeNuWxQTcijk0pqMDJ9aAt\nxlERJToFUZrlts9HAwmv06M+eRC8cBlQrcWKS9ct+T/xcng1GtUlUqVeJ6E+iNiT\n6cNp0mnN3pkMVzXk6xekYMIqn2vv98FlEiFkdC+6KprXbpf37Iw5GRwq6QKBgBuk\nzy8JbUAQ3U2vpN5QmycWsCnfZ0rIqeTFN0zpgOobBbLXXbvQQFllLmyjhOpdC8r+\nZWXn/2BgwODShWUP4z1pgla1qBH2u2QPUhmEdBQwZ7wu+Rtr4G3OK6L4rbEA4fGU\nolFXXyQRA2iuoBYoQ8q6chRKvcaGssYYQO1UvqADAoGBAN7Q4O0RfledTEc65df3\nsjJYjMJ1vcFxlXY/zg3yQFfivF7YAo2eqFeZQkIDP2ySJ3amlD0u8kzzyMnI207o\n46fZGH0t7uf0ljFnrDDkvg5tDhnUxVt7Mujk9JD1f+XwKRb5ddtjpaKPhpQxe85a\n7f16MU3HCnDHI0QljGp1uqc0\n-----END PRIVATE KEY-----\n",
+  "client_email": "fashion-studio-etl@fashion-studion-etl-project.iam.gserviceaccount.com",
+  "client_id": "118349660232988319644",
   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
   "token_uri": "https://oauth2.googleapis.com/token",
   "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/your-service-account-name%40your-gcp-project-id.iam.gserviceaccount.com",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/fashion-studio-etl%40fashion-studion-etl-project.iam.gserviceaccount.com",
   "universe_domain": "googleapis.com"
 }
