@@ -13,16 +13,25 @@ def fetch_page_content(page_number):
     Fetches the HTML content of a specific page.
     Includes error handling for network requests.
     """
-    url = f"{BASE_URL}/page{page_number}"
+    url = "" # Inisialisasi variabel url
+    if page_number == 1:
+        # Halaman pertama adalah BASE_URL itu sendiri
+        url = BASE_URL 
+    else:
+        # Untuk halaman 2 dan seterusnya, gunakan format /page{nomor_halaman}
+        url = f"{BASE_URL}/page{page_number}"
+    
+    logging.info(f"Attempting to fetch URL: {url}") # Untuk debugging URL
+
     try:
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
         response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()  # Raises an HTTPError for bad responses (4XX or 5XX)
+        response.raise_for_status()
         return response.content
     except requests.exceptions.RequestException as e:
-        logging.error(f"Error fetching page {page_number} from URL {url}: {e}") # Tambahkan URL ke log
+        logging.error(f"Error fetching page {page_number} from URL {url}: {e}") 
         return None
 
 def parse_product_data(html_content, page_number):
