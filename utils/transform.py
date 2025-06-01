@@ -57,14 +57,24 @@ def clean_rating(rating_str):
         return np.nan
 
 def clean_colors(colors_str):
-    """Cleans colors string (e.g., '5 Colors') to int or NaN."""
+    """Cleans colors string (e.g., '5 Colors' or '1 Color') to int or 0."""
     try:
-        if not colors_str or "Colors" not in colors_str:
-            return 0 # Default to 0 if no color info or invalid format
-        return int(colors_str.replace(' Colors', '').strip())
+        if pd.isna(colors_str) or not colors_str: # Handle NaN atau string kosong
+             return 0
+        
+        # Ubah semua jadi string untuk konsistensi
+        s = str(colors_str).strip()
+        
+        # Cari angka di awal string, diikuti oleh "Color" atau "Colors"
+        match = re.match(r"(\d+)\s*(Color|Colors)", s, re.IGNORECASE) # re.IGNORECASE untuk menangani "color" atau "colors"
+        if match:
+            return int(match.group(1))
+        
+        logging.warning(f"Could not parse numeric colors from '{colors_str}', defaulting to 0.")
+        return 0 # Jika format tidak cocok atau tidak ada angka
     except (ValueError, TypeError) as e:
-        logging.warning(f"Could not parse colors '{colors_str}': {e}")
-        return 0 # Default to 0 on error
+        logging.warning(f"Error parsing colors '{colors_str}': {e}, defaulting to 0.")
+        return 0
 
 def clean_size(size_str):
     """Cleans size string (e.g., 'Size: M') to string or 'Unknown'."""

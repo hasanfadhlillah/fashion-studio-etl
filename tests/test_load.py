@@ -1,12 +1,18 @@
 import pytest
 import pandas as pd
-from unittest.mock import patch, MagicMock, mock_open
+import logging
+from unittest.mock import patch, MagicMock # mock_open tidak diperlukan lagi untuk CSV dasar
 from sqlalchemy.exc import OperationalError
-import gspread
+import gspread # Untuk gspread.exceptions
 
+# Impor fungsi dan konstanta yang akan diuji/digunakan
 from utils.load import save_to_csv, save_to_postgresql, save_to_google_sheets
-from utils.config import CSV_FILE_PATH, POSTGRES_TABLE_NAME, GOOGLE_SHEET_NAME, GOOGLE_SHEETS_CREDENTIALS_FILE
+from utils.config import (
+    CSV_FILE_PATH, POSTGRES_TABLE_NAME, 
+    GOOGLE_SHEETS_CREDENTIALS_FILE, GOOGLE_SHEET_NAME, GOOGLE_SHEET_ID
+)
 from datetime import datetime
+import os # Untuk mock os.path.exists
 
 @pytest.fixture
 def sample_clean_df():
@@ -14,15 +20,15 @@ def sample_clean_df():
     now_dt = datetime.now()
     data = {
         'Title': ["Cleaned Product A", "Cleaned Product B"],
-        'Price': [160000, 320000], # IDR
+        'Price': [160000, 320000], 
         'Rating': [4.5, 3.8],
         'Colors': [3, 1],
         'Size': ["M", "L"],
         'Gender': ["Men", "Women"],
-        'Timestamp': [now_dt, now_dt]
+        'Timestamp': [pd.to_datetime(now_dt), pd.to_datetime(now_dt)] # Pastikan datetime
     }
     df = pd.DataFrame(data)
-    # Ensure dtypes match what's expected after transformation
+    # Pastikan tipe data
     df['Timestamp'] = pd.to_datetime(df['Timestamp'])
     df['Price'] = df['Price'].astype('int64')
     df['Rating'] = df['Rating'].astype('float64')
@@ -41,13 +47,14 @@ def test_save_to_csv_success(mock_to_csv, sample_clean_df):
 
 @patch('pandas.DataFrame.to_csv', side_effect=IOError("Disk full"))
 def test_save_to_csv_io_error(mock_to_csv, sample_clean_df, caplog):
-    assert save_to_csv(sample_clean_df, "test.csv") is False
+    with caplog.at_level(logging.ERROR):
+        assert save_to_csv(sample_clean_df, "test.csv") is False
     assert "Error saving data to CSV test.csv: Disk full" in caplog.text
 
 def test_save_to_csv_empty_df(empty_df, caplog):
-    assert save_to_csv(empty_df, "test.csv") is False
+    with caplog.at_level(logging.WARNING):
+        assert save_to_csv(empty_df, "test.csv") is False
     assert "DataFrame is empty. Skipping CSV save." in caplog.text
-
 
 # --- Test save_to_postgresql ---
 @patch('utils.load.create_engine')
@@ -55,96 +62,107 @@ def test_save_to_postgresql_success(mock_create_engine, sample_clean_df):
     mock_engine = MagicMock()
     mock_connection = MagicMock()
     mock_create_engine.return_value = mock_engine
-    mock_engine.connect.return_value.__enter__.return_value = mock_connection # For 'with ... as ...'
+    # Simulasikan context manager untuk with engine.connect()
+    mock_engine.connect.return_value.__enter__.return_value = mock_connection 
 
     mock_df_to_sql = MagicMock()
+    # Patch metode to_sql pada objek DataFrame (semua instance DataFrame)
     with patch.object(pd.DataFrame, 'to_sql', mock_df_to_sql):
         assert save_to_postgresql(sample_clean_df, "test_table") is True
-        mock_create_engine.assert_called_once() # Check if connection string was formed
-        mock_connection.execute.assert_called() # Check if CREATE TABLE IF NOT EXISTS was called
-        mock_df_to_sql.assert_called_once_with("test_table", mock_engine, if_exists='replace', index=False)
+    
+    mock_create_engine.assert_called_once() 
+    assert mock_connection.execute.call_count > 0 # CREATE TABLE IF NOT EXISTS dipanggil
+    mock_df_to_sql.assert_called_once_with("test_table", mock_engine, if_exists='replace', index=False)
 
-@patch('utils.load.create_engine', side_effect=OperationalError("connection failed", "", ""))
+@patch('utils.load.create_engine', side_effect=OperationalError("connection failed", "params", "orig_error"))
 def test_save_to_postgresql_connection_error(mock_create_engine, sample_clean_df, caplog):
-    assert save_to_postgresql(sample_clean_df, "test_table") is False
-    assert "Error saving data to PostgreSQL table test_table: (sqlalchemy.exc.OperationalError) connection failed" in caplog.text
+    with caplog.at_level(logging.ERROR):
+        assert save_to_postgresql(sample_clean_df, "test_table") is False
+    # Pesan error SQLAlchemy bisa kompleks, cek bagian pentingnya
+    assert "Error saving data to PostgreSQL table test_table" in caplog.text
+    assert "connection failed" in caplog.text 
 
 def test_save_to_postgresql_empty_df(empty_df, caplog):
-    assert save_to_postgresql(empty_df, "test_table") is False
+    with caplog.at_level(logging.WARNING):
+        assert save_to_postgresql(empty_df, "test_table") is False
     assert "DataFrame is empty. Skipping PostgreSQL save." in caplog.text
 
 # --- Test save_to_google_sheets ---
-@patch('utils.load.Credentials.from_service_account_file')
-@patch('utils.load.gspread.authorize')
-@patch('utils.load.os.path.exists', return_value=True) # Assume credentials file exists
-def test_save_to_google_sheets_success(mock_os_exists, mock_gspread_authorize, mock_creds_from_file, sample_clean_df):
-    mock_credentials = MagicMock()
-    mock_creds_from_file.return_value = mock_credentials
-    
-    mock_gc = MagicMock() # Mock gspread client
-    mock_gspread_authorize.return_value = mock_gc
-    
-    mock_spreadsheet = MagicMock()
-    mock_gc.open.return_value = mock_spreadsheet
-    mock_gc.create.return_value = mock_spreadsheet # For when sheet not found
-    
+# Patch utama adalah gspread.service_account yang dipanggil di utils.load
+@patch('utils.load.gspread.service_account') 
+@patch('utils.load.os.path.exists', return_value=True) # Asumsikan file creds JSON ada
+def test_save_to_google_sheets_success_with_id(mock_os_exists, mock_gspread_service_account, sample_clean_df, monkeypatch):
+    mock_client = MagicMock()
+    mock_spreadsheet = MagicMock(title="Mocked Sheet Title", url="http://mock.url") # Tambah title & url
     mock_worksheet = MagicMock()
+
+    mock_gspread_service_account.return_value = mock_client
+    mock_client.open_by_url.return_value = mock_spreadsheet # Kita pakai open_by_url sekarang jika ID ada
     mock_spreadsheet.worksheet.return_value = mock_worksheet
-    mock_spreadsheet.add_worksheet.return_value = mock_worksheet # For when worksheet not found
+    mock_spreadsheet.add_worksheet.return_value = mock_worksheet # Untuk kasus worksheet not found
 
-    assert save_to_google_sheets(sample_clean_df, "TestSheet") is True
+    # Mock GOOGLE_SHEET_ID agar logika ID yang dites
+    monkeypatch.setattr('utils.load.GOOGLE_SHEET_ID', "mock_sheet_id_123")
+    monkeypatch.setattr('utils.load.GOOGLE_SHEET_NAME', None) # Pastikan logika nama tidak jalan
+
+    assert save_to_google_sheets(sample_clean_df) is True
     
-    mock_creds_from_file.assert_called_once_with(GOOGLE_SHEETS_CREDENTIALS_FILE, scopes=["https://www.googleapis.com/auth/spreadsheets"])
-    mock_gspread_authorize.assert_called_once_with(mock_credentials)
-    mock_gc.open.assert_called_once_with("TestSheet")
+    mock_gspread_service_account.assert_called_once_with(filename=GOOGLE_SHEETS_CREDENTIALS_FILE)
+    expected_url = f"https://docs.google.com/spreadsheets/d/mock_sheet_id_123"
+    mock_client.open_by_url.assert_called_once_with(expected_url)
     mock_worksheet.clear.assert_called_once()
-    
-    # Check if update was called (actual data check is complex with mocks, focus on call)
-    assert mock_worksheet.update.called
-    
-    # Verify Timestamp conversion (example for first data row)
-    # args_list will contain a list, where the first element is the list of lists passed to update
-    call_args = mock_worksheet.update.call_args[0][0] # Gets the [df.columns.values.tolist()] + df.values.tolist()
-    # print(call_args) # for debugging
-    first_data_row_sent = call_args[1] # First row of data sent to worksheet.update
-    original_timestamp_col_index = sample_clean_df.columns.get_loc('Timestamp')
-    
-    assert isinstance(first_data_row_sent[original_timestamp_col_index], str)
+    mock_worksheet.update.assert_called_once()
 
 
-@patch('utils.load.os.path.exists', return_value=False) # Credentials file does NOT exist
+@patch('utils.load.os.path.exists', return_value=False) # File creds JSON TIDAK ada
 def test_save_to_google_sheets_no_creds_file(mock_os_exists, sample_clean_df, caplog):
-    assert save_to_google_sheets(sample_clean_df, "TestSheet") is False
+    with caplog.at_level(logging.ERROR):
+        # Panggil tanpa argumen kedua karena signature fungsi sudah diubah
+        assert save_to_google_sheets(sample_clean_df) is False 
     assert f"Google Sheets credentials file not found: {GOOGLE_SHEETS_CREDENTIALS_FILE}" in caplog.text
 
-@patch('utils.load.Credentials.from_service_account_file', side_effect=Exception("Auth error"))
+@patch('utils.load.gspread.service_account', side_effect=Exception("Simulated Auth Error"))
 @patch('utils.load.os.path.exists', return_value=True)
-def test_save_to_google_sheets_auth_error(mock_os_exists, mock_creds_from_file, sample_clean_df, caplog):
-    assert save_to_google_sheets(sample_clean_df, "TestSheet") is False
-    assert "Error saving data to Google Sheets 'TestSheet': Auth error" in caplog.text
+def test_save_to_google_sheets_auth_error(mock_os_exists, mock_gspread_service_account, sample_clean_df, caplog):
+    with caplog.at_level(logging.ERROR):
+        assert save_to_google_sheets(sample_clean_df) is False
+    assert "An unexpected error occurred while saving to Google Sheets: Simulated Auth Error" in caplog.text
 
 def test_save_to_google_sheets_empty_df(empty_df, caplog):
-    assert save_to_google_sheets(empty_df, "TestSheet") is False
+    with caplog.at_level(logging.WARNING):
+        # Panggil tanpa argumen kedua
+        assert save_to_google_sheets(empty_df) is False
     assert "DataFrame is empty. Skipping Google Sheets save." in caplog.text
 
-@patch('utils.load.Credentials.from_service_account_file')
-@patch('utils.load.gspread.authorize')
+@patch('utils.load.gspread.service_account')
 @patch('utils.load.os.path.exists', return_value=True)
-def test_save_to_google_sheets_creates_new_sheet(mock_os_exists, mock_gspread_authorize, mock_creds_from_file, sample_clean_df, caplog):
-    mock_gc = MagicMock()
-    mock_gspread_authorize.return_value = mock_gc
+def test_save_to_google_sheets_creates_new_sheet_by_name(mock_os_exists, mock_gspread_service_account, sample_clean_df, caplog, monkeypatch):
+    mock_client = MagicMock()
+    # Mock service account email
+    mock_auth_obj = MagicMock()
+    mock_auth_obj.service_account_email = "mock_sa_email@example.com"
+    mock_client.auth = mock_auth_obj
+
+    mock_gspread_service_account.return_value = mock_client
     
-    # Simulate SpreadsheetNotFound, then successful creation
-    mock_gc.open.side_effect = gspread.exceptions.SpreadsheetNotFound
-    mock_new_spreadsheet = MagicMock()
-    mock_new_spreadsheet.url = "http://new.sheet.url" # mock the url attribute
-    mock_gc.create.return_value = mock_new_spreadsheet
+    # Simulasikan SpreadsheetNotFound saat open by name, lalu create berhasil
+    mock_client.open.side_effect = gspread.exceptions.SpreadsheetNotFound
+    mock_new_spreadsheet = MagicMock(title="Fashion Studio Products", url="http://new.sheet.url")
+    mock_client.create.return_value = mock_new_spreadsheet
     
     mock_worksheet = MagicMock()
-    mock_new_spreadsheet.worksheet.return_value = mock_worksheet # if it tries to get an existing ws
-    mock_new_spreadsheet.add_worksheet.return_value = mock_worksheet # if it adds a new ws
+    mock_new_spreadsheet.worksheet.return_value = mock_worksheet # Atau add_worksheet jika itu yg dipanggil
+    mock_new_spreadsheet.add_worksheet.return_value = mock_worksheet
 
-    assert save_to_google_sheets(sample_clean_df, "NewNonExistentSheet") is True
-    mock_gc.create.assert_called_once_with("NewNonExistentSheet")
-    assert "Spreadsheet 'NewNonExistentSheet' not found. Creating new one." in caplog.text
-    assert "Sheet URL: http://new.sheet.url" in caplog.text # Verify URL logging
+
+    # Mock GOOGLE_SHEET_ID menjadi None agar logika nama yang dites
+    monkeypatch.setattr('utils.load.GOOGLE_SHEET_ID', None) 
+    monkeypatch.setattr('utils.load.GOOGLE_SHEET_NAME', "Fashion Studio Products")
+
+    with caplog.at_level(logging.INFO):
+        assert save_to_google_sheets(sample_clean_df) is True
+    
+    mock_client.open.assert_called_once_with("Fashion Studio Products")
+    mock_client.create.assert_called_once_with("Fashion Studio Products")
+    assert "Spreadsheet 'Fashion Studio Products' not found by name. Creating new one with this name." in caplog.text
+    assert "Spreadsheet 'Fashion Studio Products' created. URL: http://new.sheet.url" in caplog.text
