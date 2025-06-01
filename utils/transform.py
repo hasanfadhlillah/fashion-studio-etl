@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import re # Impor modul regex
 from .config import USD_TO_IDR_EXCHANGE_RATE
 import logging
 
@@ -26,14 +27,32 @@ def convert_price_to_idr(price_usd):
         return np.nan
 
 def clean_rating(rating_str):
-    """Cleans rating string (e.g., 'Rating: 4.8 / 5' or 'Rating: Invalid Rating / 5') to float or NaN."""
+    """Cleans rating string (e.g., 'Rating: ⭐ 4.8 / 5' or 'Rating: Not Rated') to float or NaN."""
     try:
-        if "Invalid Rating" in rating_str or not rating_str:
+        if pd.isna(rating_str) or not rating_str: # Handle NaN atau string kosong
             return np.nan
-        # Extract numeric part like "4.8" from "Rating: 4.8 / 5"
-        rating_value = rating_str.split(':')[1].split('/')[0].strip()
-        return float(rating_value)
-    except (IndexError, ValueError, TypeError) as e:
+
+        # Ubah semua jadi string untuk konsistensi (jika ada tipe lain)
+        rating_str = str(rating_str)
+
+        # Kasus khusus seperti "Invalid Rating" atau "Not Rated"
+        if "Invalid Rating" in rating_str or "Not Rated" in rating_str:
+            return np.nan
+
+        # Hilangkan bagian "Rating: " dan emoji bintang "⭐" serta spasi ekstra
+        # Menggunakan regex untuk mencari angka desimal (atau integer)
+        # Pola ini mencari satu atau lebih digit, diikuti opsional oleh titik dan satu atau lebih digit
+        match = re.search(r'(\d+(\.\d+)?)', rating_str)
+        
+        if match:
+            rating_value_str = match.group(1) # Ambil angka yang cocok
+            return float(rating_value_str)
+        else:
+            # Jika tidak ada angka yang cocok setelah pembersihan awal
+            logging.warning(f"Could not extract numeric rating from '{rating_str}' after basic cleaning.")
+            return np.nan
+
+    except Exception as e: # Tangkap exception yang lebih umum juga
         logging.warning(f"Could not parse rating '{rating_str}': {e}")
         return np.nan
 
