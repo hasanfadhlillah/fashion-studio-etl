@@ -1,0 +1,23 @@
+Cara menjalankan skrip ETL pipeline
+python main.py
+
+A. Cara menjalankan unit test pada folder tests
+python -m pytest tests
+atau:
+python3 -m pytest tests
+
+B. Cara menjalankan test coverage pada folder tests
+1. Jalankan test dengan coverage:
+coverage run -m pytest tests
+2. Lihat laporan di console:
+coverage report -m
+3. (Opsional) Buat laporan HTML:
+coverage html
+Laporan HTML akan ada di folder htmlcov/index.html
+
+C. URL Google Sheets:
+- Ganti dengan URL Google Sheet Anda setelah skrip berhasil dijalankan pertama kali
+dan sheet telah dibuat/diperbarui. Contoh:
+https://docs.google.com/spreadsheets/d/your_unique_google_sheet_id/edit
+- Service account email yang perlu diberi akses Editor ke Google Sheet:
+(Lihat 'client_email' di dalam file google-sheets-api.json Anda)
