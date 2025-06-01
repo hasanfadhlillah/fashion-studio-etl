@@ -48,7 +48,7 @@ Instruksi Penggunaan Proyek ETL Fashion Studio
       https://docs.google.com/spreadsheets/d/1kvTvc0RNMtJk6JMrBGmkp3L7bvv113dIDrv-cvfC_kw/edit
       (Catatan: Skrip akan membuat worksheet baru bernama "Products Data" atau menggunakan yang sudah ada di dalam Spreadsheet ini.)
 
-   b. Penting untuk Reviewer:
+   b. Penting:
       * Pastikan Google Sheet di atas telah bagikan (share) dengan alamat email Service Account berikut dengan hak akses sebagai Editor:
           `fashion-studio-etl@fashion-studion-etl-project.iam.gserviceaccount.com`
           (Alamat email ini berasal dari file `google-sheets-api.json`).
