@@ -85,7 +85,7 @@ def save_to_google_sheets(df):
         client = gspread.service_account(filename=GOOGLE_SHEETS_CREDENTIALS_FILE)
         logging.info(f"Type of client object: {type(client)}")
         spreadsheet = None
-        service_account_email = client.auth.service_account_email # Dapatkan email SA di awal
+        # service_account_email = client.auth.service_account_email # <--- HAPUS ATAU KOMENTARI BARIS INI JIKA ADA DI LUAR BLOK IF
 
         if GOOGLE_SHEET_ID:
             sheet_url = f"https://docs.google.com/spreadsheets/d/{GOOGLE_SHEET_ID}"
@@ -94,17 +94,18 @@ def save_to_google_sheets(df):
                 spreadsheet = client.open_by_url(sheet_url)
                 logging.info(f"Successfully opened Google Sheet '{spreadsheet.title}' using URL (with ID).")
             except gspread.exceptions.APIError as e:
-                logging.error(f"API error opening Google Sheet by URL (with ID '{GOOGLE_SHEET_ID}'): {e}. This is likely an authentication/permission issue (e.g., JWT, sheet not shared, APIs not enabled).")
-                logging.error(f"Ensure the sheet is shared with '{service_account_email}' as Editor and Google Drive/Sheets APIs are enabled.")
+                logging.error(f"API error opening Google Sheet by URL (with ID '{GOOGLE_SHEET_ID}'): {e}.")
+                # Pesan error sudah cukup jelas tanpa email SA di sini
+                logging.error(f"Ensure the sheet is shared with your service account as Editor and Google Drive/Sheets APIs are enabled.")
                 return False 
             except gspread.exceptions.SpreadsheetNotFound:
-                logging.error(f"Google Sheet with ID '{GOOGLE_SHEET_ID}' not found via URL. Ensure the ID is correct and the sheet exists.")
+                logging.error(f"Google Sheet with ID '{GOOGLE_SHEET_ID}' not found via URL. Ensure ID is correct, sheet exists, and shared with your service account as Editor.")
                 return False
             except Exception as e_url:
                 logging.error(f"Unexpected error opening Google Sheet by URL (with ID '{GOOGLE_SHEET_ID}'): {e_url}")
                 return False
         
-        elif GOOGLE_SHEET_NAME: # Hanya jika GOOGLE_SHEET_ID tidak ada atau kosong
+        elif GOOGLE_SHEET_NAME:
             logging.info(f"GOOGLE_SHEET_ID not found or not used. Attempting to open/create Google Sheet by name: {GOOGLE_SHEET_NAME}")
             try:
                 spreadsheet = client.open(GOOGLE_SHEET_NAME)
@@ -114,20 +115,21 @@ def save_to_google_sheets(df):
                 try:
                     spreadsheet = client.create(GOOGLE_SHEET_NAME)
                     logging.info(f"Spreadsheet '{GOOGLE_SHEET_NAME}' created. URL: {spreadsheet.url}")
-                    logging.info(f"Ensure it's shared with {service_account_email} as Editor.")
+                    # Pesan sharing sudah cukup tanpa menyebut email SA dari client.auth
+                    logging.info(f"Ensure it's shared appropriately as Editor if others need access.")
                 except Exception as e_create:
                     logging.error(f"Error creating sheet by name '{GOOGLE_SHEET_NAME}': {e_create}")
                     return False
-            except gspread.exceptions.APIError as e: # Tangkap APIError juga untuk open by name
-                logging.error(f"API error opening Google Sheet by name '{GOOGLE_SHEET_NAME}': {e}. This is likely an authentication/permission issue (e.g., JWT, sheet not shared, APIs not enabled).")
-                logging.error(f"Ensure the sheet (if it exists) is shared with '{service_account_email}' as Editor and Google Drive/Sheets APIs are enabled.")
+            except gspread.exceptions.APIError as e:
+                logging.error(f"API error opening Google Sheet by name '{GOOGLE_SHEET_NAME}': {e}.")
+                logging.error(f"Ensure the sheet (if it exists) is shared with your service account as Editor and Google Drive/Sheets APIs are enabled.")
                 return False
             except Exception as e_open_name:
                 logging.error(f"Error opening sheet by name '{GOOGLE_SHEET_NAME}': {e_open_name}")
                 return False
         
         if not spreadsheet:
-            logging.error(f"Could not open or create Google Sheet. Please verify GOOGLE_SHEET_ID/GOOGLE_SHEET_NAME in .env, ensure sharing permissions are correct with '{service_account_email}', and that Google Drive/Sheets APIs are enabled in your GCP project.")
+            logging.error(f"Could not open or create Google Sheet. Verify GOOGLE_SHEET_ID/GOOGLE_SHEET_NAME in .env, sharing permissions, and API status in GCP.")
             return False
 
         worksheet_title = "Products Data"
@@ -148,7 +150,7 @@ def save_to_google_sheets(df):
         logging.info(f"Data successfully saved to Google Sheet: '{spreadsheet.title}', Worksheet: '{worksheet_title}'")
         logging.info(f"Sheet URL: {spreadsheet.url}")
         return True
-        
+           
     except Exception as e:
         logging.error(f"An unexpected error occurred during Google Sheets operation: {e}")
         return False
