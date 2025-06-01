@@ -145,11 +145,6 @@ def test_transform_data_type_error_handling(sample_raw_df, caplog, monkeypatch):
 
     monkeypatch.setattr('utils.transform.clean_size', faulty_clean_size)
     
-    # We expect the overall transform_data to catch this and return an empty DF
-    # because the error is not handled within clean_size itself to allow the row to proceed.
-    # If clean_size handled it and returned 'Unknown', the row might proceed.
-    # This tests the outer try-except in transform_data.
-    
     df_transformed = transform_data(sample_raw_df.copy()) # Use a copy
     
     assert "An error occurred during data transformation" in caplog.text

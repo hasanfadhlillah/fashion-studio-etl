@@ -1,5 +1,5 @@
 import pandas as pd
-import np # numpy akan diimpor oleh pandas, tapi bisa juga eksplisit jika ada fungsi numpy murni
+import np
 from .config import USD_TO_IDR_EXCHANGE_RATE
 import logging
 
@@ -95,16 +95,7 @@ def transform_data(df_raw):
         df = df[df['Title'] != "Unknown Product"]
         
         # Drop rows with NaN in critical columns that make the data unusable
-        # Price (IDR) will be NaN if Price_USD was NaN (e.g. "Price Unavailable")
-        # Rating will be NaN if it was "Invalid Rating"
-        # Title is already filtered for "Unknown Product"
         df.dropna(subset=['Price', 'Rating', 'Title'], inplace=True)
-
-        # Handle potential nulls in non-critical but specified-type columns after cleaning
-        # For instance, if clean_colors returned NaN (though current impl returns 0)
-        # This step ensures no nulls in final dataset if that's a strict requirement
-        # and transformation did not fill them.
-        # The current cleaning functions mostly provide defaults or are handled by dropna above.
 
         # Remove duplicates
         df.drop_duplicates(subset=['Title', 'Price', 'Size', 'Gender', 'Colors'], keep='first', inplace=True)

@@ -99,11 +99,6 @@ def test_save_to_google_sheets_success(mock_os_exists, mock_gspread_authorize, m
     mock_gc.open.assert_called_once_with("TestSheet")
     mock_worksheet.clear.assert_called_once()
     
-    # Check if Timestamp was converted to string for update
-    # The mock_worksheet.update call receives a list of lists.
-    # The first inner list is headers, the rest are data rows.
-    # The Timestamp column index in sample_clean_df is -1 (last column)
-    
     # Check if update was called (actual data check is complex with mocks, focus on call)
     assert mock_worksheet.update.called
     

@@ -26,8 +26,8 @@ def run_etl_pipeline():
         logging.error("Transformation failed or resulted in no data. ETL pipeline cannot continue.")
         return
     logging.info(f"Successfully transformed data. {len(cleaned_product_data)} products ready for loading.")
-    # print(cleaned_product_data.head())
-    # print(cleaned_product_data.info())
+    print(cleaned_product_data.head())
+    print(cleaned_product_data.info())
 
 
     # 3. Load
@@ -47,9 +47,9 @@ def run_etl_pipeline():
         logging.warning("Failed to load data to PostgreSQL.")
 
     # Load to Google Sheets
-    gs_success = save_to_google_sheets(cleaned_product_data, GOOGLE_SHEET_NAME)
+    gs_success = save_to_google_sheets(cleaned_product_data) 
     if gs_success:
-        logging.info(f"Data loaded to Google Sheets: {GOOGLE_SHEET_NAME}")
+        logging.info(f"Data loaded to Google Sheets (details in config/.env).")
     else:
         logging.warning("Failed to load data to Google Sheets.")
 

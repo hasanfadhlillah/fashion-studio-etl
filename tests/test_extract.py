@@ -86,9 +86,6 @@ def test_parse_product_data_no_cards(caplog):
 
 def test_parse_product_data_parsing_error(caplog):
     """Test parsing with malformed HTML (simulated by passing None)."""
-    # This simulates a more fundamental parsing issue within BeautifulSoup if HTML is totally unparsable
-    # or a different kind of unexpected structure that causes an unhandled exception.
-    # Here, we pass None which will cause TypeError inside BeautifulSoup
     products = parse_product_data(None, 1)
     assert len(products) == 0
     assert "Error parsing product data on page 1" in caplog.text
