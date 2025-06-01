@@ -33,30 +33,36 @@ def save_to_postgresql(df, table_name=POSTGRES_TABLE_NAME):
         logging.warning("DataFrame is empty. Skipping PostgreSQL save.")
         return False
         
-    # connection_string = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-
-    # TAMBAHKAN BARIS INI SEMENTARA (GANTI DENGAN NILAI ASLI ANDA):
+    # ---- AWAL BLOK HARDCODE UNTUK DEBUGGING ----
     temp_db_user = "fashionetladmin"
-    temp_db_password = "cobaLAGI789" # Pastikan ini 100% sama dengan yg berhasil di psql
+    temp_db_password = "cobaLAGI789" 
     temp_db_host = "localhost"
     temp_db_port = "5432"
     temp_db_name = "fashion_products"
-    connection_string = f"postgresql://{temp_db_user}:{temp_db_password}@{temp_db_host}:{temp_db_port}/{temp_db_name}"
-
+    # Gunakan connection_string dari nilai hardcode ini:
+    connection_string_for_debug = f"postgresql://{temp_db_user}:{temp_db_password}@{temp_db_host}:{temp_db_port}/{temp_db_name}"
     logging.info(f"DEBUG: Using hardcoded connection string: postgresql://{temp_db_user}:*****@{temp_db_host}:{temp_db_port}/{temp_db_name}")
-    
-    # DEBUGGING LINES:
-    logging.info(f"Attempting PostgreSQL connection with:")
-    logging.info(f"  DB_USER: '{DB_USER}' (Type: {type(DB_USER)})")
-    logging.info(f"  DB_PASSWORD: '{DB_PASSWORD[:2]}...{DB_PASSWORD[-2:]if len(DB_PASSWORD)>4 else ''}' (Length: {len(DB_PASSWORD)})") # Jangan log password penuh
-    logging.info(f"  DB_HOST: '{DB_HOST}'")
-    logging.info(f"  DB_PORT: '{DB_PORT}'")
-    logging.info(f"  DB_NAME: '{DB_NAME}'")
+    # ---- AKHIR BLOK HARDCODE UNTUK DEBUGGING ----
 
-    connection_string = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    logging.info(f"  Connection String: postgresql://{DB_USER}:*****@{DB_HOST}:{DB_PORT}/{DB_NAME}")
+    # Gunakan connection_string_for_debug jika ingin tes hardcode
+    # ATAU gunakan connection_string dari .env jika tes hardcode selesai
+    # connection_string_to_use = connection_string_for_debug # Untuk tes hardcode
+    
+    # Baris asli yang menggunakan .env (pastikan ini di-uncomment setelah tes hardcode)
+    connection_string_from_env = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    logging.info(f"INFO: Using connection string from .env: postgresql://{DB_USER}:*****@{DB_HOST}:{DB_PORT}/{DB_NAME}")
+    connection_string_to_use = connection_string_from_env
+
+
+    # Log nilai yang benar-benar akan digunakan:
+    # logging.info(f"Attempting PostgreSQL connection with (from .env):")
+    # logging.info(f"   DB_USER: '{DB_USER}'")
+    # logging.info(f"   DB_PASSWORD: '{DB_PASSWORD[:2]}...{DB_PASSWORD[-2:]if len(DB_PASSWORD)>4 else ''}' (Length: {len(DB_PASSWORD)})")
+    # logging.info(f"   DB_HOST: '{DB_HOST}'")
+    # logging.info(f"   DB_PORT: '{DB_PORT}'")
+    # logging.info(f"   DB_NAME: '{DB_NAME}'")
     try:
-        engine = create_engine(connection_string)
+        engine = create_engine(connection_string_to_use)
         with engine.connect() as connection:
             create_table_query = text(f"""
             CREATE TABLE IF NOT EXISTS {table_name} (
