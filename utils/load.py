@@ -94,9 +94,7 @@ def save_to_google_sheets(df): # Hapus parameter sheet_name, akan menggunakan da
             except gspread.exceptions.SpreadsheetNotFound:
                 logging.warning(f"Google Sheet with ID '{GOOGLE_SHEET_ID}' not found.")
                 # Jika ID diberikan tapi tidak ditemukan, kita bisa memilih untuk gagal atau fallback ke nama.
-                # Untuk skenario ini, jika ID ada di .env, kita asumsikan pengguna ingin sheet spesifik itu.
-                # Jika Anda ingin membuat sheet baru jika ID tidak ditemukan, Anda bisa menghapus `return False` di bawah
-                # dan membiarkan logika nama berjalan. Tapi, ID biasanya untuk sheet yang sudah ada.
+                # Untuk skenario ini, jika ID ada di .env, kita ingin sheet spesifik itu.
                 logging.error(f"If GOOGLE_SHEET_ID is specified in .env, the sheet must exist and be shared with {creds.service_account_email}.")
                 return False
             except gspread.exceptions.APIError as e:
