@@ -60,9 +60,9 @@ def test_clean_colors(caplog): # Tambah caplog jika perlu
     assert clean_colors("No Colors Here") == 0
     assert clean_colors(None) == 0
     assert clean_colors("") == 0
-    with caplog.at_level(logging.WARNING): # Jika fungsi Anda log warning untuk "abc"
+    with caplog.at_level(logging.WARNING): # fungsi log warning untuk "abc"
       assert clean_colors("abc") == 0
-    # Anda bisa cek log jika clean_colors("abc") menghasilkan warning
+    # cek log jika clean_colors("abc") menghasilkan warning
     # assert "Could not parse numeric colors from 'abc'" in caplog.text 
 
 def test_clean_size():

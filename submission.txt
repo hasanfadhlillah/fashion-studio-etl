@@ -1,23 +1,55 @@
-Cara menjalankan skrip ETL pipeline
-python main.py
+Instruksi Penggunaan Proyek ETL Fashion Studio
 
-A. Cara menjalankan unit test pada folder tests
-python -m pytest tests
-atau:
-python3 -m pytest tests
+## Prasyarat:
+1.  Pastikan berada di direktori root proyek (`fashion-studio-etl/`).
+2.  Aktifkan environment Conda yang sesuai (misalnya, `gspread_clean_env` atau environment lain yang gunakan untuk proyek ini):
+    ```bash
+    conda activate nama_environment 
+    ```
+3.  Pastikan semua dependensi telah terinstal dari `requirements.txt`:
+    ```bash
+    pip install -r requirements.txt
+    ```
+4.  Pastikan file `.env` sudah dikonfigurasi dengan kredensial PostgreSQL.
+5.  Pastikan file `google-sheets-api.json` (kredensial Service Account) ada di direktori root proyek.
 
-B. Cara menjalankan test coverage pada folder tests
-1. Jalankan test dengan coverage:
-coverage run -m pytest tests
-2. Lihat laporan di console:
-coverage report -m
-3. (Opsional) Buat laporan HTML:
-coverage html
-Laporan HTML akan ada di folder htmlcov/index.html
+## 1. Cara Menjalankan Skrip ETL Pipeline Penuh:
+   Untuk mengekstrak, mentransformasi, dan memuat data ke CSV, PostgreSQL, dan Google Sheets.
+   ```bash
+   python main.py
+   ```
 
-C. URL Google Sheets:
-- Ganti dengan URL Google Sheet Anda setelah skrip berhasil dijalankan pertama kali
-dan sheet telah dibuat/diperbarui. Contoh:
-https://docs.google.com/spreadsheets/d/your_unique_google_sheet_id/edit
-- Service account email yang perlu diberi akses Editor ke Google Sheet:
-(Lihat 'client_email' di dalam file google-sheets-api.json Anda)
+## 2. Cara Menjalankan Unit Tests:
+   Untuk menjalankan semua unit test yang ada di folder `tests/`.
+   ```bash
+   python -m pytest tests
+   ```
+
+## 3. Cara Menjalankan Test Coverage:
+   Untuk menghasilkan laporan cakupan tes.
+   a. Jalankan tes dengan coverage:
+      ```bash
+      coverage run -m pytest tests
+      ```
+   b. Lihat laporan ringkas di konsol (termasuk file yang tidak tercakup):
+      ```bash
+      coverage report -m
+      ```
+   c. (Opsional) Buat laporan HTML yang lebih detail:
+      ```bash
+      coverage html
+      ```
+      Laporan HTML akan tersedia di folder `htmlcov/index.html`. Buka file ini di browser.
+
+
+## 4. Informasi Google Sheets:
+   a. URL Google Sheet Hasil ETL:
+      ```
+      https://docs.google.com/spreadsheets/d/1kvTvc0RNMtJk6JMrBGmkp3L7bvv113dIDrv-cvfC_kw/edit
+      (Catatan: Skrip akan membuat worksheet baru bernama "Products Data" atau menggunakan yang sudah ada di dalam Spreadsheet ini.)
+
+   b. Penting untuk Reviewer:
+      * Pastikan Google Sheet di atas telah bagikan (share) dengan alamat email Service Account berikut dengan hak akses sebagai Editor:
+          `fashion-studio-etl@fashion-studion-etl-project.iam.gserviceaccount.com`
+          (Alamat email ini berasal dari file `google-sheets-api.json`).
+      * Selain itu, untuk memudahkan proses review, pastikan juga Google Sheet tersebut memiliki pengaturan akses: "Anyone with the link" (Siapa saja yang memiliki link) dapat menjadi "Editor".
