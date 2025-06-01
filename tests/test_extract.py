@@ -6,7 +6,7 @@ import pandas as pd
 from datetime import datetime
 import logging # Untuk caplog
 
-# Definisikan MOCK HTML di sini (saya asumsikan ini sudah ada dan benar di file Anda)
+# Definisikan MOCK HTML di sini
 MOCK_HTML_PAGE_1_CONTENT = """
 <html><body>
     <div class="collection-card">
@@ -20,7 +20,7 @@ MOCK_HTML_PAGE_1_CONTENT = """
     <div class="collection-card">
         <h3 class="product-title">Awesome Jeans</h3>
         <p class="price">Price Unavailable</p>
-        <p>Rating: Invalid Rating / 5</p>
+        <p>Rating: ⭐ Invalid Rating / 5</p>
         <p>2 Colors</p>
         <p>Size: L</p>
         <p>Gender: Unisex</p>
@@ -82,15 +82,15 @@ def test_parse_product_data_success():
     assert len(products) == 2
     assert products[0]['Title'] == "Cool T-Shirt"
     assert products[0]['Price'] == "$25.99"
-    assert products[0]['Rating'] == "Rating: 4.5 / 5"
+    assert products[0]['Rating'] == "Rating: ⭐ 4.5 / 5"
     assert products[0]['Colors'] == "3 Colors"
     assert products[0]['Size'] == "Size: M"
     assert products[0]['Gender'] == "Gender: Men"
     assert isinstance(products[0]['Timestamp'], datetime)
 
     assert products[1]['Title'] == "Awesome Jeans"
-    assert products[1]['Price'] == "Price Unavailable" # Correctly captured
-    assert products[1]['Rating'] == "Rating: Invalid Rating / 5"
+    assert products[1]['Price'] == "Price Unavailable"
+    assert products[1]['Rating'] == "Rating: ⭐ Invalid Rating / 5" 
 
 def test_parse_product_data_no_cards(caplog):
     """Test parsing when no product cards are found."""

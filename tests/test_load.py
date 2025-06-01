@@ -126,7 +126,9 @@ def test_save_to_google_sheets_no_creds_file(mock_os_exists, sample_clean_df, ca
 def test_save_to_google_sheets_auth_error(mock_os_exists, mock_gspread_service_account, sample_clean_df, caplog):
     with caplog.at_level(logging.ERROR):
         assert save_to_google_sheets(sample_clean_df) is False
-    assert "An unexpected error occurred while saving to Google Sheets: Simulated Auth Error" in caplog.text
+    assert "Simulated Auth Error" in caplog.text
+    assert "ERROR    root:load.py" in caplog.text # Cek apakah prefix ada
+    assert "An unexpected error occurred during Google Sheets operation: Simulated Auth Error" in caplog.text # Lebih cocok dengan pesan penuh tanpa newline
 
 def test_save_to_google_sheets_empty_df(empty_df, caplog):
     with caplog.at_level(logging.WARNING):
@@ -162,7 +164,18 @@ def test_save_to_google_sheets_creates_new_sheet_by_name(mock_os_exists, mock_gs
     with caplog.at_level(logging.INFO):
         assert save_to_google_sheets(sample_clean_df) is True
     
+    print("\n--- CAPTURED LOGS FOR test_save_to_google_sheets_creates_new_sheet_by_name ---")
+    print(caplog.text)
+    print("--- END OF CAPTURED LOGS ---\n")
+    
     mock_client.open.assert_called_once_with("Fashion Studio Products")
     mock_client.create.assert_called_once_with("Fashion Studio Products")
-    assert "Spreadsheet 'Fashion Studio Products' not found by name. Creating new one with this name." in caplog.text
-    assert "Spreadsheet 'Fashion Studio Products' created. URL: http://new.sheet.url" in caplog.text
+    
+    # Pesan log yang diharapkan:
+    expected_log_not_found = "Spreadsheet 'Fashion Studio Products' not found by name. Attempting to create new one with this name."
+    expected_log_created = "Spreadsheet 'Fashion Studio Products' created. URL: http://new.sheet.url"
+    expected_log_shared_info = "Ensure it's shared appropriately as Editor if others need access." # atau bagian dari pesan ini
+
+    assert expected_log_not_found in caplog.text
+    assert expected_log_created in caplog.text
+    assert expected_log_shared_info in caplog.text
