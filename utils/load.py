@@ -33,7 +33,28 @@ def save_to_postgresql(df, table_name=POSTGRES_TABLE_NAME):
         logging.warning("DataFrame is empty. Skipping PostgreSQL save.")
         return False
         
+    # connection_string = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+    # TAMBAHKAN BARIS INI SEMENTARA (GANTI DENGAN NILAI ASLI ANDA):
+    temp_db_user = "fashionetladmin"
+    temp_db_password = "cobaLAGI789" # Pastikan ini 100% sama dengan yg berhasil di psql
+    temp_db_host = "localhost"
+    temp_db_port = "5432"
+    temp_db_name = "fashion_products"
+    connection_string = f"postgresql://{temp_db_user}:{temp_db_password}@{temp_db_host}:{temp_db_port}/{temp_db_name}"
+
+    logging.info(f"DEBUG: Using hardcoded connection string: postgresql://{temp_db_user}:*****@{temp_db_host}:{temp_db_port}/{temp_db_name}")
+    
+    # DEBUGGING LINES:
+    logging.info(f"Attempting PostgreSQL connection with:")
+    logging.info(f"  DB_USER: '{DB_USER}' (Type: {type(DB_USER)})")
+    logging.info(f"  DB_PASSWORD: '{DB_PASSWORD[:2]}...{DB_PASSWORD[-2:]if len(DB_PASSWORD)>4 else ''}' (Length: {len(DB_PASSWORD)})") # Jangan log password penuh
+    logging.info(f"  DB_HOST: '{DB_HOST}'")
+    logging.info(f"  DB_PORT: '{DB_PORT}'")
+    logging.info(f"  DB_NAME: '{DB_NAME}'")
+
     connection_string = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    logging.info(f"  Connection String: postgresql://{DB_USER}:*****@{DB_HOST}:{DB_PORT}/{DB_NAME}")
     try:
         engine = create_engine(connection_string)
         with engine.connect() as connection:
@@ -77,7 +98,12 @@ def save_to_google_sheets(df):
         
     try: # TRY UTAMA UNTUK SELURUH OPERASI GOOGLE SHEETS
         # Menggunakan gspread.service_account untuk inisialisasi client
+        logging.info(f"gspread module imported: {gspread}") # DEBUG
+        logging.info(f"Attempting to init client with: gspread.service_account(filename='{GOOGLE_SHEETS_CREDENTIALS_FILE}')") # DEBUG
+
         client = gspread.service_account(filename=GOOGLE_SHEETS_CREDENTIALS_FILE)
+        logging.info(f"Type of client object: {type(client)}") # DEBUG
+        logging.info(f"Does client have 'open_by_id'?: {hasattr(client, 'open_by_id')}") # DEBUG
         spreadsheet = None
 
         # 1. Coba buka dengan ID jika ada
