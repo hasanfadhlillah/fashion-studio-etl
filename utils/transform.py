@@ -1,5 +1,5 @@
 import pandas as pd
-import np
+import numpy as np
 from .config import USD_TO_IDR_EXCHANGE_RATE
 import logging
 
