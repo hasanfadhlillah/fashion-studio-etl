@@ -16,12 +16,14 @@ def clean_price(price_str):
         logging.warning(f"Could not parse price '{price_str}': {e}")
         return np.nan
 
+# utils/transform.py
 def convert_price_to_idr(price_usd):
     """Converts USD price to IDR."""
     try:
         if pd.isna(price_usd):
             return np.nan
-        return int(price_usd * USD_TO_IDR_EXCHANGE_RATE)
+        # Biarkan sebagai float untuk mengakomodasi nilai desimal
+        return float(price_usd * USD_TO_IDR_EXCHANGE_RATE) # Ubah int() menjadi float()
     except (ValueError, TypeError) as e:
         logging.warning(f"Could not convert price '{price_usd}' to IDR: {e}")
         return np.nan
@@ -131,7 +133,7 @@ def transform_data(df_raw):
         
         # Ensure correct data types
         df['Timestamp'] = pd.to_datetime(df['Timestamp'])
-        df['Price'] = df['Price'].astype('int64') # Price is now IDR
+        df['Price'] = df['Price'].astype('float64') # Ubah 'int64' menjadi 'float64'
         df['Rating'] = df['Rating'].astype('float64')
         df['Colors'] = df['Colors'].astype('int64')
         df['Title'] = df['Title'].astype(str)
