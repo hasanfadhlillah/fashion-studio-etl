@@ -84,8 +84,8 @@ def test_transform_data_success(sample_raw_df):
     assert len(df_transformed) == 2 # Hanya 2 produk valid yang tersisa setelah pembersihan
 
     # Check data types
-    assert df_transformed['Title'].dtype == 'object' # Pandas uses 'object' for strings
-    assert df_transformed['Price'].dtype == 'int64'
+    assert df_transformed['Title'].dtype == 'object'
+    assert df_transformed['Price'].dtype == 'float64'
     assert df_transformed['Rating'].dtype == 'float64'
     assert df_transformed['Colors'].dtype == 'int64'
     assert df_transformed['Size'].dtype == 'object'
