@@ -52,4 +52,3 @@ Instruksi Penggunaan Proyek ETL Fashion Studio
       * Pastikan Google Sheet di atas telah bagikan (share) dengan alamat email Service Account berikut dengan hak akses sebagai Editor:
           `fashion-studio-etl@fashion-studion-etl-project.iam.gserviceaccount.com`
           (Alamat email ini berasal dari file `google-sheets-api.json`).
-      * Selain itu, untuk memudahkan proses review, pastikan juga Google Sheet tersebut memiliki pengaturan akses: "Anyone with the link" (Siapa saja yang memiliki link) dapat menjadi "Editor".
